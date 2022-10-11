@@ -1,0 +1,47 @@
+description: fusion in decoder
+
+target:
+  service: amlk8s
+  # run "pt target list amlk8s" to list the names of available AMLK8s targets
+  name: itphyperdgx2cl2
+  vc: hcrr01
+#  name: itphyperdgx2cl1
+#  vc: hai6
+
+environment:
+  # image: ninja0/mmaction2-cuda11.0:latest
+#  image: zdou0830/vilt:latest
+  image: guilk/gm:latest
+  setup:
+    - export MKL_SERVICE_FORCE_INTEL=1
+    - export TORCH_DISTRIBUTED_DEBUG=INFO
+
+code:
+  # local directory of the code. this will be uploaded to the server.
+  # $CONFIG_DIR is expanded to the directory of this config file
+  local_dir: $CONFIG_DIR
+
+# data:
+storage:
+  data:
+    storage_account_name: liangkegui
+    container_name: vldatasets
+    mount_dir: /mnt/root
+
+  datafolder:
+#    storage_account_name: lkgui
+#    container_name: trainingdata
+     storage_account_name: liangkegui
+     container_name: knowledgereasoning
+
+# list of jobs to run, we run 2 jobs in this example
+jobs:
+
+- name: knowledge_reasoning
+  sku: 1xG16
+  aml_mpirun:
+    process_count_per_node: 1
+    communicator: "OpenMpi"
+  command:
+      - python3.8 tools/lazyconfig_train_net.py --config-file configs/COCO/mask_rcnn_vitdet_b_100ep.py --num-gpus 16 "train.output_dir=/mnt/root/detections/vanilla_mae_mask"
+ #    - python3.8 tools/lazyconfig_train_net.py --config-file configs/COCO/mask_rcnn_vitdet_b_100ep.py --num-gpus 16 --num-machines 2 "dataloader.train.total_batch_size=64"

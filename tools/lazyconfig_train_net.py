@@ -12,8 +12,11 @@ few common configuration parameters currently defined in "configs/common/train.p
 To add more complicated training logic, you can easily add other configs
 in the config file and implement a new train_net.py to handle them.
 """
+import os
+os.environ["DETECTRON2_DATASETS"] = "/mnt/root/detections"
+import warnings
+warnings.filterwarnings('ignore')
 import logging
-
 from detectron2.checkpoint import DetectionCheckpointer
 from detectron2.config import LazyConfig, instantiate
 from detectron2.engine import (
@@ -105,10 +108,12 @@ def do_train(args, cfg):
 
 
 def main(args):
+
     cfg = LazyConfig.load(args.config_file)
     cfg = LazyConfig.apply_overrides(cfg, args.opts)
+   
     default_setup(cfg, args)
-
+   
     if args.eval_only:
         model = instantiate(cfg.model)
         model.to(cfg.train.device)
